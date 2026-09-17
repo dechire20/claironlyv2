@@ -1,11 +1,12 @@
-# claironlyv2
-
+# claironlyv2 — DeepCheck
 
 A fact checker for social media.
 
 Paste a link from anywhere — TikTok, Instagram, X, YouTube, Facebook, 
 Reddit, a news article — and DeepCheck tells you whether the claim 
 is true, false, misleading, or unverifiable, with sources.
+
+Live at **claironly.com**.
 
 ## What it does
 
@@ -17,12 +18,12 @@ is true, false, misleading, or unverifiable, with sources.
 
 ## How it works (simple version)
 
-- **Already checked?** → Returns instantly from a fact-check database.
-- **Text or article?** → Reads the page directly, no download needed.
-- **Video post?** → Pulls the caption and metadata.
-- **Then:** searches reliable sources and asks an AI to weigh everything 
+- Already checked? Returns instantly from a fact-check database.
+- Text or article? Reads the page directly, no download needed.
+- Video post? Pulls the caption and metadata.
+- Then searches reliable sources and asks an AI to weigh everything 
   and give one clear verdict.
-- **Repeat links** → served from cache in under 2 seconds.
+- Repeat links are served from cache in under 2 seconds.
 
 ## Speed
 
@@ -33,14 +34,18 @@ is true, false, misleading, or unverifiable, with sources.
 ## Supported platforms
 
 Any public URL. Best results on:
-TikTok · Instagram · X / Twitter · YouTube · Facebook · Reddit · news sites
+TikTok, Instagram, X/Twitter, YouTube, Facebook, Reddit, news sites.
 
 ## What you get back
 
-- **Verdict** — True / False / Misleading / Unverifiable
-- **Why** — short explanation in plain language
-- **Sources** — links to evidence
-- **Confidence** — how sure the system is
+- Verdict — True / False / Misleading / Unverifiable
+- Why — short explanation in plain language
+- Sources — links to evidence
+- Confidence — how sure the system is
+
+## Use it
+
+Open **claironly.com** in any browser. No install, no account.
 
 ## Notes
 
