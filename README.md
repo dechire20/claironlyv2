@@ -1,4 +1,4 @@
-# claironlyv2 — DeepCheck
+# claironlyv2 
 
 A fact checker for social media.
 
