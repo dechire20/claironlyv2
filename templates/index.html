@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<title>DeepCheck</title>
+<style>
+:root{--bg:#0a0a0a;--surface:#111;--border:#222;--text:#f0f0f0;--muted:#555;--dim:#333;--green:#00e676;--red:#ff1744;--orange:#ff9100;--yellow:#ffd600;--blue:#2979ff;--r:10px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100dvh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:.4;}
+.wrap{max-width:540px;margin:0 auto;padding:0 16px;position:relative;z-index:1;}
+
+/* ── Header ── */
+header{padding:32px 0 24px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-name{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:0.06em;line-height:1;}
+.badge{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.14em;color:var(--green);border:1px solid rgba(0,230,118,0.3);padding:4px 8px;border-radius:20px;text-transform:uppercase;background:rgba(0,230,118,0.05);}
+
+/* ── Hero ── */
+.hero{padding:12px 0 28px;}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,14vw,5.5rem);line-height:0.92;letter-spacing:0.02em;margin-bottom:14px;}
+.hero h1 .hi{color:var(--green);}
+.hero-sub{font-size:0.95rem;color:var(--muted);line-height:1.5;max-width:340px;}
+.hero-sub strong{color:var(--text);}
+.speed-row{display:flex;align-items:center;gap:8px;margin:16px 0 0;flex-wrap:wrap;}
+.speed-chip{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;padding:5px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted);}
+.speed-chip.fast{border-color:rgba(0,230,118,0.4);color:var(--green);background:rgba(0,230,118,0.06);}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.4s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* ── Input ── */
+.input-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;}
+.url-row{display:flex;gap:10px;align-items:stretch;}
+.url-field{flex:1;background:var(--bg);border:1px solid var(--dim);border-radius:var(--r);padding:14px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.82rem;outline:none;transition:border-color .2s,box-shadow .2s;min-width:0;}
+.url-field:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,230,118,.08);}
+.url-field::placeholder{color:var(--muted);}
+.check-btn{padding:0 20px;background:var(--green);color:#000;border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;display:flex;align-items:center;gap:6px;}
+.check-btn:hover{background:#33eb91;transform:translateY(-1px);}
+.check-btn:active{transform:translateY(0);}
+.check-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.context-row{margin-top:12px;}
+.context-field{width:100%;background:var(--bg);border:1px solid var(--dim);border-radius:var(--r);padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none;resize:none;transition:border-color .2s;line-height:1.5;}
+.context-field:focus{border-color:rgba(0,230,118,.4);}
+.context-field::placeholder{color:var(--muted);}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+.pill{font-size:0.72rem;font-family:'DM Mono',monospace;padding:4px 10px;border:1px solid var(--dim);border-radius:20px;color:var(--muted);cursor:pointer;transition:all .15s;user-select:none;}
+.pill:hover{border-color:var(--green);color:var(--green);}
+.error-box{display:none;background:rgba(255,23,68,.08);border:1px solid rgba(255,23,68,.3);border-radius:var(--r);padding:12px 16px;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--red);margin-top:12px;}
+.error-box.show{display:block;}
+
+/* ── Loading ── */
+.loading-card{display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;margin-bottom:16px;}
+.loading-card.show{display:block;}
+.loading-top{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+.spin-ring{width:42px;height:42px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--green);animation:spin .8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);margin-bottom:3px;}
+.loading-msg{font-size:0.85rem;color:var(--muted);}
+.prog-wrap{margin-bottom:20px;}
+.prog-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.prog-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);}
+.prog-pct{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--green);line-height:1;}
+.prog-track{height:3px;background:var(--dim);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,#00b248,#00e676,#69ffb0);border-radius:3px;width:0%;transition:width .7s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;}
+.prog-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:sweep 1.5s ease-in-out infinite;}
+@keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+.steps{display:flex;flex-direction:column;gap:10px;}
+.step-row{display:flex;align-items:center;gap:12px;opacity:.25;transition:opacity .3s;}
+.step-row.active{opacity:1;}
+.step-row.done{opacity:.5;}
+.step-icon{width:28px;height:28px;border-radius:8px;background:var(--dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;transition:background .3s;}
+.step-row.active .step-icon{background:rgba(0,230,118,.15);}
+.step-row.done   .step-icon{background:rgba(0,230,118,.08);}
+.step-text{font-size:0.85rem;color:var(--muted);flex:1;}
+.step-row.active .step-text{color:var(--text);}
+.step-time{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);}
+
+/* ── Progressive reveal cards ── */
+#feed{margin-bottom:12px;}
+
+@keyframes revealIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+.rcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:10px;animation:revealIn .4s cubic-bezier(.4,0,.2,1) both;}
+.rcard.accent{border-color:rgba(0,230,118,.25);background:rgba(0,230,118,.03);}
+
+.sec-head{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.irow{display:flex;gap:10px;align-items:flex-start;margin-bottom:9px;font-size:0.85rem;line-height:1.5;color:rgba(240,240,240,.85);}
+.irow:last-child{margin-bottom:0;}
+.iarrow{color:var(--green);font-family:'DM Mono',monospace;font-size:0.7rem;margin-top:3px;flex-shrink:0;}
+.irow.flag .iarrow{color:var(--red);}
+.visual-box{background:rgba(41,121,255,.05);border:1px solid rgba(41,121,255,.2);border-radius:var(--r);padding:14px;font-size:0.85rem;line-height:1.6;color:rgba(240,240,240,.8);font-style:italic;}
+.rec-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--green);margin-bottom:8px;}
+.rec-text{font-size:0.9rem;line-height:1.6;}
+
+/* Sources */
+.src-row{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+.src-row:first-child{padding-top:0;}
+.src-row:last-child{border-bottom:none;padding-bottom:0;}
+.src-n{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--green);background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);border-radius:4px;padding:2px 6px;flex-shrink:0;margin-top:1px;}
+.src-name{font-weight:600;font-size:0.85rem;margin-bottom:2px;}
+.src-name a{color:var(--green);text-decoration:none;}
+.src-name a:hover{text-decoration:underline;}
+.src-desc{font-size:0.78rem;color:var(--muted);line-height:1.45;}
+
+/* Reddit community verdict */
+.reddit-card{border-radius:12px;padding:18px;margin-bottom:10px;animation:revealIn .4s cubic-bezier(.4,0,.2,1) both;}
+.reddit-confirmed {border:2px solid var(--green);  background:rgba(0,230,118,.06);}
+.reddit-staged    {border:2px solid var(--orange);  background:rgba(255,145,0,.06);}
+.reddit-debunked  {border:2px solid var(--red);     background:rgba(255,23,68,.06);}
+.reddit-mixed     {border:2px solid var(--yellow);  background:rgba(255,214,0,.06);}
+.reddit-unknown   {border:2px solid var(--dim);     background:var(--surface);}
+.reddit-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.reddit-icon{font-size:1.2rem;}
+.reddit-label{font-family:"DM Mono",monospace;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);}
+.reddit-verdict{font-family:"Bebas Neue",sans-serif;font-size:1.3rem;letter-spacing:0.04em;line-height:1;}
+.reddit-confirmed .reddit-verdict{color:var(--green);}
+.reddit-staged    .reddit-verdict{color:var(--orange);}
+.reddit-debunked  .reddit-verdict{color:var(--red);}
+.reddit-mixed     .reddit-verdict{color:var(--yellow);}
+.reddit-unknown   .reddit-verdict{color:var(--muted);}
+.reddit-summary{font-size:0.88rem;line-height:1.55;color:rgba(240,240,240,.85);margin-bottom:12px;}
+.reddit-posts{display:flex;flex-direction:column;gap:6px;}
+.reddit-post{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--border);text-decoration:none;}
+.reddit-post:hover{border-color:var(--dim);}
+.reddit-sub{font-family:"DM Mono",monospace;font-size:0.62rem;color:var(--green);flex-shrink:0;margin-top:1px;}
+.reddit-post-title{font-size:0.78rem;color:var(--muted);line-height:1.4;flex:1;}
+.reddit-score{font-family:"DM Mono",monospace;font-size:0.6rem;color:var(--dim);flex-shrink:0;margin-top:2px;}
+
+/* Ticker */
+.ticker{background:transparent;border:1px dashed var(--dim);border-radius:12px;padding:13px 18px;margin-bottom:10px;display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);animation:revealIn .3s ease both;}
+.tdot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1s infinite;flex-shrink:0;}
+
+/* ── Verdict (shown LAST) ── */
+@keyframes verdictReveal{0%{opacity:0;transform:translateY(28px) scale(.97);}60%{transform:translateY(-4px) scale(1.01);}100%{opacity:1;transform:translateY(0) scale(1);}}
+.verdict-banner{border-radius:16px;padding:24px;margin-bottom:12px;animation:verdictReveal .65s cubic-bezier(.4,0,.2,1) both;}
+.vb-fake      {border:2px solid var(--red);   background:rgba(255,23,68,.05);}
+.vb-misleading{border:2px solid var(--orange); background:rgba(255,145,0,.05);}
+.vb-context   {border:2px solid var(--yellow); background:rgba(255,214,0,.05);}
+.vb-authentic {border:2px solid var(--green);  background:rgba(0,230,118,.05);}
+.vb-unknown   {border:2px solid var(--blue);   background:rgba(41,121,255,.05);}
+.vb-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.verdict-tag{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:0.06em;line-height:1;}
+.vb-fake       .verdict-tag{color:var(--red);}
+.vb-misleading .verdict-tag{color:var(--orange);}
+.vb-context    .verdict-tag{color:var(--yellow);}
+.vb-authentic  .verdict-tag{color:var(--green);}
+.vb-unknown    .verdict-tag{color:var(--blue);}
+.conf-block{text-align:right;}
+.conf-num{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1;}
+.vb-fake       .conf-num{color:var(--red);}
+.vb-misleading .conf-num{color:var(--orange);}
+.vb-context    .conf-num{color:var(--yellow);}
+.vb-authentic  .conf-num{color:var(--green);}
+.vb-unknown    .conf-num{color:var(--blue);}
+.conf-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;}
+.conf-bar-track{width:100%;height:3px;background:var(--dim);border-radius:3px;overflow:hidden;margin-bottom:14px;}
+.conf-bar-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.vb-fake       .conf-bar-fill{background:var(--red);}
+.vb-misleading .conf-bar-fill{background:var(--orange);}
+.vb-context    .conf-bar-fill{background:var(--yellow);}
+.vb-authentic  .conf-bar-fill{background:var(--green);}
+.vb-unknown    .conf-bar-fill{background:var(--blue);}
+.verdict-summary{font-size:0.9rem;line-height:1.65;color:rgba(240,240,240,.8);}
+
+.reset-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:transparent;border:1px solid var(--dim);border-radius:var(--r);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;margin:14px 0 40px;transition:all .15s;}
+.reset-btn:hover{border-color:var(--green);color:var(--green);}
+footer{text-align:center;padding:16px 0 32px;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim);letter-spacing:0.08em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="7" stroke="#000" stroke-width="2"/>
+          <path d="M16.5 16.5L21 21" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M11 8v6M8 11h6" stroke="#000" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="logo-name">DeepCheck</span>
+    </div>
+    <div class="badge"><div class="dot-live" style="display:inline-block;margin-right:5px;vertical-align:middle"></div>LIVE</div>
+  </header>
+
+  <div class="hero">
+    <h1>IS THIS<br>VIDEO <span class="hi">REAL?</span></h1>
+    <p class="hero-sub">Paste any TikTok, Instagram or YouTube link.<br><strong>AI watches the actual video</strong> and fact-checks it.</p>
+    <div class="speed-row">
+      <div class="speed-chip fast"><div class="dot-live"></div>~60 sec</div>
+      <div class="speed-chip">Gemini Vision</div>
+      <div class="speed-chip">No signup</div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-card" id="inputCard">
+    <div class="url-row">
+      <input class="url-field" id="urlInput" type="url" placeholder="Paste TikTok / Instagram / YouTube URL…" autocomplete="off">
+      <button class="check-btn" onclick="analyze()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2.2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Check
+      </button>
+    </div>
+    <div class="pills">
+      <span class="pill" onclick="paste('tiktok')">TikTok</span>
+      <span class="pill" onclick="paste('instagram')">Instagram</span>
+      <span class="pill" onclick="paste('youtube')">YouTube Shorts</span>
+      <span class="pill" onclick="paste('youtube-long')">YouTube</span>
+    </div>
+    <div class="context-row">
+      <textarea class="context-field" id="contextInput" rows="2" placeholder="Optional: what is this video claiming? Any context to help the analysis…"></textarea>
+    </div>
+    <div class="error-box" id="errorBox"></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-card" id="loadingCard">
+    <div class="loading-top">
+      <div class="spin-ring"></div>
+      <div>
+        <div class="loading-title">Analysing Video</div>
+        <div class="loading-msg" id="loadingMsg">Starting…</div>
+      </div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <span class="prog-label">Progress</span>
+        <span class="prog-pct" id="progPct">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    </div>
+    <div class="steps">
+      <div class="step-row" id="s0"><div class="step-icon">⬇️</div><div class="step-text">Downloading video</div><div class="step-time">~5s</div></div>
+      <div class="step-row" id="s1"><div class="step-icon">☁️</div><div class="step-text">Uploading to Gemini</div><div class="step-time">~5s</div></div>
+      <div class="step-row" id="s2"><div class="step-icon">👁️</div><div class="step-text">Gemini watching video</div><div class="step-time">~40s</div></div>
+      <div class="step-row" id="s3"><div class="step-icon">⚖️</div><div class="step-text">Forming verdict</div><div class="step-time">~10s</div></div>
+      <div class="step-row" id="s4"><div class="step-icon">🔗</div><div class="step-text">Finding sources</div><div class="step-time">~5s</div></div>
+    </div>
+  </div>
+
+  <!-- Progressive feed — cards appear here one by one -->
+  <div id="feed"></div>
+
+  <!-- Verdict (injected into feed last, then reset btn appended) -->
+  <div id="afterVerdict" style="display:none">
+    <button class="reset-btn" onclick="reset()">← Check another video</button>
+  </div>
+
+  <footer>DEEPCHECK · GEMINI VISION · FOR EDUCATIONAL USE</footer>
+</div>
+
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+
+/* ── State ── */
+let pollTimer=null, microTimer=null, curPct=0, tickerEl=null;
+// Each key = whether that section has been rendered yet
+const done = {};
+const STEPS = ['s0','s1','s2','s3','s4'];
+
+/* ── Helpers ── */
+function paste(p){
+  const ph={tiktok:'https://www.tiktok.com/@username/video/123',instagram:'https://www.instagram.com/reel/ABC/','youtube':'https://www.youtube.com/shorts/ABC','youtube-long':'https://www.youtube.com/watch?v=ABC'};
+  document.getElementById('urlInput').value='';
+  document.getElementById('urlInput').placeholder=ph[p]||'';
+  document.getElementById('urlInput').focus();
+}
+function showErr(m){const b=document.getElementById('errorBox');b.textContent='⚠ '+m;b.classList.add('show');}
+function hideErr(){document.getElementById('errorBox').classList.remove('show');}
+
+function setProg(pct,msg){
+  curPct=pct;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progPct').textContent=Math.round(pct)+'%';
+  if(msg) document.getElementById('loadingMsg').textContent=msg;
+}
+function startMicro(ceil){
+  clearInterval(microTimer);
+  microTimer=setInterval(()=>{if(curPct<ceil-1)setProg(curPct+0.3,null);},400);
+}
+function setStep(idx){
+  STEPS.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.classList.remove('active','done');
+    if(i<idx) el.classList.add('done');
+    if(i===idx) el.classList.add('active');
+  });
+}
+
+function showTicker(msg){
+  removeTicker();
+  tickerEl=document.createElement('div');
+  tickerEl.className='ticker';
+  tickerEl.innerHTML=`<div class="tdot"></div><span>${msg}</span>`;
+  document.getElementById('feed').appendChild(tickerEl);
+  tickerEl.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function removeTicker(){if(tickerEl){tickerEl.remove();tickerEl=null;}}
+
+function addCard(html, accent){
+  removeTicker();
+  const c=document.createElement('div');
+  c.className='rcard'+(accent?' accent':'');
+  c.innerHTML=html;
+  document.getElementById('feed').appendChild(c);
+  c.scrollIntoView({behavior:'smooth',block:'nearest'});
+  return c;
+}
+
+function rows(arr,icon,cls){
+  return (arr||[]).map(t=>`<div class="irow ${cls||''}"><span class="iarrow">${icon}</span><span>${t}</span></div>`).join('');
+}
+
+function vcls(v){
+  v=(v||'').toUpperCase();
+  if(v.includes('FAKE'))     return 'vb-fake';
+  if(v.includes('MISLEAD'))  return 'vb-misleading';
+  if(v.includes('CONTEXT'))  return 'vb-context';
+  if(v.includes('AUTHENTIC'))return 'vb-authentic';
+  return 'vb-unknown';
+}
+
+/* ── Render functions — each checks done[key] to avoid double-render ── */
+
+function tryMeta(job){
+  if(done.meta || !job.meta) return;
+  done.meta=true;
+  const m=job.meta;
+  if(!m.title && !m.thumbnail) return;
+  const thumb=m.thumbnail
+    ?`<img style="width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0" src="${m.thumbnail}" onerror="this.style.display='none'" alt="">`
+    :`<div style="width:52px;height:52px;border-radius:8px;background:var(--dim);flex-shrink:0"></div>`;
+  const parts=[m.uploader,m.platform,m.duration?m.duration+'s':''].filter(Boolean);
+  addCard(`<div style="display:flex;align-items:center;gap:12px">${thumb}<div style="flex:1;min-width:0"><div style="font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">${m.title||''}</div><div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted)">${parts.join(' · ')}</div></div></div>`);
+}
+
+function tryAnalysis(job){
+  // Trigger as soon as key_claims has been set (it's an array, even empty)
+  // We check key_claims !== null since null means "not yet set by backend"
+  if(done.analysis || job.key_claims === null || job.key_claims === undefined) return;
+  done.analysis=true;
+  setStep(3);
+
+  if(job.visual_analysis)
+    addCard(`<div class="sec-head">👁️ What Gemini Observed</div><div class="visual-box">${job.visual_analysis}</div>`);
+
+  if((job.key_claims||[]).length)
+    addCard(`<div class="sec-head">📋 Key Claims in This Video</div>${rows(job.key_claims,'→','')}`);
+
+  if((job.red_flags||[]).length)
+    addCard(`<div class="sec-head">⚠️ Red Flags</div>${rows(job.red_flags,'⚠','flag')}`);
+
+  if((job.verification_points||[]).length)
+    addCard(`<div class="sec-head">🔎 How to Verify</div>${rows(job.verification_points,'✓','')}`);
+
+  if(job.recommendation)
+    addCard(`<div class="rec-label">💡 What Should You Do?</div><p class="rec-text">${job.recommendation}</p>`, true);
+
+  setStep(4);
+  showTicker('Finding sources…');
+}
+
+function trySources(job){
+  if(done.sources || !(job.sources||[]).length) return;
+  done.sources=true;
+  const html=(job.sources||[]).map((s,i)=>`
+    <div class="src-row">
+      <span class="src-n">${String(i+1).padStart(2,'0')}</span>
+      <div>
+        <div class="src-name"><a href="${s.url}" target="_blank" rel="noopener">${s.name}</a></div>
+        <div class="src-desc">${s.description||''}</div>
+      </div>
+    </div>`).join('');
+  addCard(`<div class="sec-head">🔗 Sources & References</div>${html}`);
+}
+
+function tryVerdict(job){
+  // Only show verdict once sources are also rendered (or job is done with no sources)
+  // This ensures verdict is truly the last thing shown
+  const sourcesReady = done.sources || job.status==='done';
+  if(done.verdict || !job.verdict || !sourcesReady) return;
+  done.verdict=true;
+  removeTicker();
+  const vc=vcls(job.verdict);
+  const conf=parseInt(job.confidence)||0;
+  const banner=document.createElement('div');
+  banner.className=`verdict-banner ${vc}`;
+  banner.innerHTML=`
+    <div class="vb-top">
+      <div class="verdict-tag">${(job.verdict||'UNKNOWN').replace(/_/g,' ')}</div>
+      <div class="conf-block">
+        <div class="conf-num">${conf}%</div>
+        <div class="conf-label">Confidence</div>
+      </div>
+    </div>
+    <div class="conf-bar-track"><div class="conf-bar-fill" id="confFill" style="width:0%"></div></div>
+    <p class="verdict-summary">${job.summary||''}</p>`;
+  document.getElementById('feed').appendChild(banner);
+  banner.scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>{const f=document.getElementById('confFill');if(f)f.style.width=conf+'%';},100);
+  document.getElementById('afterVerdict').style.display='block';
+}
+
+function tryReddit(job){
+  if(done.reddit || !job.reddit) return;
+  done.reddit=true;
+
+  const r=job.reddit;
+  const sent=r.community_sentiment||'unknown';
+  const cls={confirmed:'reddit-confirmed',staged:'reddit-staged',debunked:'reddit-debunked',mixed:'reddit-mixed',unknown:'reddit-unknown'}[sent]||'reddit-unknown';
+
+  let postsHtml='';
+  if((r.top_posts||[]).length){
+    postsHtml='<div class="reddit-posts">'+
+      (r.top_posts||[]).map(p=>`
+        <a class="reddit-post" href="${p.url}" target="_blank" rel="noopener">
+          <span class="reddit-sub">${p.subreddit}</span>
+          <span class="reddit-post-title">${p.title}</span>
+          <span class="reddit-score">↑${p.score}</span>
+        </a>`).join('')+
+      '</div>';
+  }
+
+  const card=document.createElement('div');
+  card.className=`reddit-card ${cls}`;
+  card.innerHTML=`
+    <div class="reddit-header">
+      <span class="reddit-icon">🔴</span>
+      <div>
+        <div class="reddit-label">What Reddit thinks</div>
+        <div class="reddit-verdict">${r.community_verdict||'No discussion found'}</div>
+      </div>
+    </div>
+    <p class="reddit-summary">${r.summary||''}</p>
+    ${postsHtml}`;
+  document.getElementById('feed').appendChild(card);
+  card.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function tryDone(job){
+  if(done.finished) return;
+  if(job.status==='done'){
+    done.finished=true;
+    document.getElementById('loadingCard').classList.remove('show');
+    clearInterval(pollTimer);
+    clearInterval(microTimer);
+    setProg(100,'Done!');
+  }
+}
+
+/* ── Main render loop — called on every poll ── */
+function render(job){
+  // Update progress bar
+  if(job.progress_pct!=null && job.progress_pct>curPct){
+    setProg(job.progress_pct, job.message||null);
+    startMicro(job.progress_pct+8);
+  }
+
+  // Step indicators based on status
+  if(job.status==='downloading') setStep(0);
+  if(job.status==='analyzing' && job.progress_pct>=10 && job.progress_pct<22) setStep(1);
+  if(job.status==='analyzing' && job.progress_pct>=22 && job.progress_pct<58) setStep(2);
+
+  // Render each section as its data becomes available
+  tryMeta(job);
+  tryAnalysis(job);
+  tryReddit(job);    // reddit community verdict — the hook
+  trySources(job);   // render sources BEFORE verdict so verdict is truly last
+  tryVerdict(job);
+  tryDone(job);
+}
+
+/* ── Analyze ── */
+async function analyze(){
+  const url=document.getElementById('urlInput').value.trim();
+  const ctx=document.getElementById('contextInput').value.trim();
+  hideErr();
+  if(!url){showErr('Please paste a video URL first.');return;}
+
+  // Reset everything
+  document.getElementById('inputCard').style.display='none';
+  document.getElementById('feed').innerHTML='';
+  document.getElementById('afterVerdict').style.display='none';
+  document.getElementById('loadingCard').classList.add('show');
+  STEPS.forEach(id=>document.getElementById(id).classList.remove('active','done'));
+  Object.keys(done).forEach(k=>delete done[k]);
+  tickerEl=null; curPct=0;
+  setProg(4,'Starting…');
+  setStep(0);
+  showTicker('Downloading video…');
+
+  let task_id;
+  try{
+    const r=await fetch('/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url,context:ctx})});
+    const d=await r.json();
+    if(d.error){bail(d.error);return;}
+    task_id=d.task_id;
+  }catch(e){bail('Network error. Check your connection.');return;}
+
+  startMicro(12);
+
+  pollTimer=setInterval(async()=>{
+    try{
+      const r=await fetch(`/status/${task_id}`);
+      const job=await r.json();
+      if(job.error&&!job.status){bail(job.error);return;}
+      render(job);
+      if(job.status==='error') bail(job.error||'Analysis failed.');
+    }catch(e){ /* transient */ }
+  }, 2000);
+}
+
+function bail(msg){
+  clearInterval(pollTimer);clearInterval(microTimer);
+  document.getElementById('loadingCard').classList.remove('show');
+  document.getElementById('inputCard').style.display='block';
+  removeTicker();showErr(msg);
+}
+
+function reset(){
+  clearInterval(pollTimer);clearInterval(microTimer);
+  document.getElementById('feed').innerHTML='';
+  document.getElementById('afterVerdict').style.display='none';
+  document.getElementById('inputCard').style.display='block';
+  document.getElementById('urlInput').value='';
+  document.getElementById('contextInput').value='';
+  Object.keys(done).forEach(k=>delete done[k]);
+  tickerEl=null;hideErr();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('urlInput').addEventListener('keydown',e=>{if(e.key==='Enter')analyze();});
+});
+</script>
+</body>
+</html>
